@@ -1,4 +1,5 @@
-import { initStrudel } from '@strudel/web';
+// import { initStrudel } from '@strudel/web';
+import { initStrudel, getRepl } from "./strudelWeb"
 
 export class StrudelClient {
 	constructor() {
@@ -14,6 +15,9 @@ export class StrudelClient {
 
 	async evaluate(code) {
 		return evaluate(code);
+	}
+	async stop() {
+		getRepl().stop();
 	}
 }
 

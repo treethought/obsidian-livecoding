@@ -17,7 +17,7 @@ export default class AlogRavePlugin extends Plugin {
 	strudel: StrudelClient;
 
 	onunload() {
-
+		this.strudel?.stop()
 	}
 
 	async onload() {
