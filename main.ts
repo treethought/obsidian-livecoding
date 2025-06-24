@@ -10,15 +10,20 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: 'default'
 }
 
-export default class MyPlugin extends Plugin {
+export default class AlogRavePlugin extends Plugin {
 	settings: MyPluginSettings;
 	strudel: StrudelClient;
 
+	onunload() {
+
+	}
+
 	async onload() {
 		await this.loadSettings();
-		this.strudel = new StrudelClient();
-		await this.strudel.init()
-		console.log("Strudel done intit");
+		if (!this.strudel) {
+			this.strudel = new StrudelClient();
+			await this.strudel.init()
+		}
 
 
 		this.addRibbonIcon('music', 'ALGORAVE', () => {
@@ -40,10 +45,7 @@ export default class MyPlugin extends Plugin {
 				modifiers: ['Shift', "Ctrl"],
 				key: 'h',
 			}],
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				const sel = editor.getValue()
-				console.log("Evaluating file content:")
-				console.log(sel)
+			callback: () => {
 				this.strudel.evaluate('hush()')
 			},
 		})
@@ -57,8 +59,6 @@ export default class MyPlugin extends Plugin {
 			}],
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				const sel = editor.getValue()
-				console.log("Evaluating file content:")
-				console.log(sel)
 				this.strudel.evaluate(sel)
 			},
 		})
@@ -69,16 +69,25 @@ export default class MyPlugin extends Plugin {
 			hotkeys: [{
 				modifiers: ['Shift', "Ctrl"],
 				key: 'e',
+			},
+			{
+				modifiers: ["Shift", "Ctrl"],
+				key: "enter",
 			}],
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				// conse bodeBlocks = view.contentEl
-				const sel = editor.getValue()
-				console.log(sel)
+				const content = this.getCodeBlockContent(editor);
+				if (!content) {
+					new Notice("No code block found at cursor position.");
+					return;
+				}
+				this.strudel.evaluate(content);
 			},
 		})
 
 
 		this.registerMarkdownPostProcessor((element, context) => {
+			// TODO eval from processor if mode enabled
+			return
 			const codeblocks = element.findAll('code');
 
 			for (let codeblock of codeblocks) {
@@ -88,8 +97,42 @@ export default class MyPlugin extends Plugin {
 		});
 	}
 
-	onunload() {
+	getCodeBlockContent(editor: Editor): string | null {
+		if (!editor) return null;
 
+		// Get cursor position
+		const cursor = editor.getCursor();
+
+		const doc = editor.getDoc();
+		let startLine = cursor.line;
+		let endLine = cursor.line;
+
+		while (startLine >= 0) {
+			const line = doc.getLine(startLine);
+			if (line.trim().startsWith('```')) {
+				break;
+			}
+			startLine--;
+		}
+
+		while (endLine < doc.lineCount()) {
+			const line = doc.getLine(endLine);
+			if (line.trim().startsWith('```') && endLine > startLine) {
+				break;
+			}
+			endLine++;
+		}
+
+		// extract code content excluding ``` lines
+		if (startLine >= 0 && endLine < doc.lineCount()) {
+			const codeBlockText = doc.getRange(
+				{ line: startLine + 1, ch: 0 },
+				{ line: endLine, ch: 0 }
+			).trim();
+
+			return codeBlockText;
+		}
+		return null;
 	}
 
 	async loadSettings() {
