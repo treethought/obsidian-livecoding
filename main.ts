@@ -1,5 +1,7 @@
-import { Editor, MarkdownView, Notice, Plugin} from 'obsidian';
+import { App, Editor, MarkdownView, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 import { StrudelClient } from './strudel';
+import { EditorView } from '@codemirror/view';
+import { flash, flashField } from "@strudel/codemirror";
 
 
 interface MyPluginSettings {
@@ -26,6 +28,7 @@ export default class AlogRavePlugin extends Plugin {
 		}
 
 
+		this.registerEditorExtension(flashField);
 		this.addRibbonIcon('music', 'ALGORAVE', () => {
 			// this.activateView(VIEW_TYPE_REPO);
 		});
@@ -75,11 +78,19 @@ export default class AlogRavePlugin extends Plugin {
 				key: "enter",
 			}],
 			editorCallback: (editor: Editor, view: MarkdownView) => {
+				if (!editor) {
+					new Notice("No editor found.");
+					return;
+				}
+
 				const content = this.getCodeBlockContent(editor);
 				if (!content) {
 					new Notice("No code block found at cursor position.");
 					return;
 				}
+				// @ts-expect-error, not typed
+				const editorView = view.editor.cm as EditorView
+				flash(editorView)
 				this.strudel.evaluate(content);
 			},
 		})
@@ -98,9 +109,6 @@ export default class AlogRavePlugin extends Plugin {
 	}
 
 	getCodeBlockContent(editor: Editor): string | null {
-		if (!editor) return null;
-
-		// Get cursor position
 		const cursor = editor.getCursor();
 
 		const doc = editor.getDoc();

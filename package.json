@@ -22,6 +22,7 @@
 		"typescript": "4.7.4"
 	},
 	"dependencies": {
+		"@strudel/codemirror": "^1.2.2",
 		"@strudel/core": "^1.2.2",
 		"@strudel/repl": "^1.2.3",
 		"@strudel/web": "^1.2.3",
