@@ -4,8 +4,9 @@ import { EditorView } from '@codemirror/view';
 
 import { flash, flashField } from "@strudel/codemirror";
 import { initHydra, clearHydra } from "@strudel/hydra";
+import { AlgoRaveSamplesView, VIEW_TYPE_ALGORAVE_SAMPLES } from 'view';
 
-interface MyPluginSettings {
+interface AlgoRavePluginSettings {
 	mySetting: string;
 }
 
@@ -14,7 +15,7 @@ const DEFAULT_SETTINGS: AlgoRavePluginSettings = {
 }
 
 export default class AlogRavePlugin extends Plugin {
-	settings: MyPluginSettings;
+	settings: AlgoRavePluginSettings;
 	strudel: StrudelClient;
 
 	onunload() {
@@ -26,6 +27,11 @@ export default class AlogRavePlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
+		this.registerView(
+			VIEW_TYPE_ALGORAVE_SAMPLES,
+			(leaf) => new AlgoRaveSamplesView(leaf),
+		);
+
 		// Check for hydra canvas periodically
 		this.registerInterval(window.setInterval(() => {
 			const hydraCanvas = document.getElementById('hydra-canvas');
@@ -35,6 +41,18 @@ export default class AlogRavePlugin extends Plugin {
 				document.body.removeClass('hydra-active');
 			}
 		}, 1000));
+
+		// This creates an icon in the left ribbon.
+		const ribbonIcon = this.addRibbonIcon(
+			"music",
+			"AlgoRave Samples",
+			(_evt: MouseEvent) => {
+				// Called when the user clicks the icon.
+				this.activateView(VIEW_TYPE_ALGORAVE_SAMPLES);
+			},
+		);
+		ribbonIcon.addClass("my-plugin-ribbWebClipson-class");
+
 
 		this.strudel = new StrudelClient();
 
