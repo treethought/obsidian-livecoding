@@ -1,4 +1,3 @@
-// import { initStrudel } from '@strudel/web';
 import { initStrudel, getRepl } from "./strudelWeb"
 
 export class StrudelClient {
@@ -16,7 +15,9 @@ export class StrudelClient {
 	async evaluate(code) {
 		return evaluate(code);
 	}
+
 	async stop() {
+		console.log('Stopping repl...');
 		getRepl().stop();
 	}
 }

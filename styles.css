@@ -26,34 +26,33 @@ If your plugin does not need CSS, delete this file.
 	pointer-events: none !important;
 }
 
-/* Make ALL UI containers transparent */
-body, 
-.app-container,
-.horizontal-main-container,
-.workspace,
-.workspace-split,
-.workspace-tabs,
-.workspace-tab-container,
-.workspace-leaf,
-.workspace-leaf-content,
-.view-content,
-.markdown-source-view,
-.markdown-preview-view,
-.cm-editor,
-.cm-scroller,
-.cm-content,
-.cm-contentContainer,
-.markdown-rendered,
-.markdown-preview-sizer {
+/* Only apply transparent backgrounds when hydra is active */
+body.hydra-active .app-container,
+body.hydra-active .horizontal-main-container,
+body.hydra-active .workspace,
+body.hydra-active .workspace-split,
+body.hydra-active .workspace-tabs,
+body.hydra-active .workspace-tab-container,
+body.hydra-active .workspace-leaf,
+body.hydra-active .workspace-leaf-content,
+body.hydra-active .view-content,
+body.hydra-active .markdown-source-view,
+body.hydra-active .markdown-preview-view,
+body.hydra-active .cm-editor,
+body.hydra-active .cm-scroller,
+body.hydra-active .cm-content,
+body.hydra-active .cm-contentContainer,
+body.hydra-active .markdown-rendered,
+body.hydra-active .markdown-preview-sizer {
 	background: transparent !important;
 	background-color: transparent !important;
 }
 
-/* Keep text readable but transparent backgrounds */
-.workspace-tab-header,
-.view-header,
-.nav-files-container,
-.status-bar {
+/* Keep text readable but transparent backgrounds when hydra is active */
+body.hydra-active .workspace-tab-header,
+body.hydra-active .view-header,
+body.hydra-active .nav-files-container,
+body.hydra-active .status-bar {
 	background: rgba(0, 0, 0, 0.1) !important;
 	backdrop-filter: blur(2px) !important;
 }
