@@ -2,8 +2,6 @@ import { Editor, MarkdownView, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
 import { StrudelClient } from './strudel';
 import { EditorView } from '@codemirror/view';
 
-import { flash, flashField } from "@strudel/codemirror";
-import { initHydra, clearHydra } from "@strudel/hydra";
 import { AlgoRaveSamplesView, VIEW_TYPE_ALGORAVE_SAMPLES } from 'view';
 
 interface AlgoRavePluginSettings {
@@ -21,7 +19,6 @@ export default class AlogRavePlugin extends Plugin {
 	onunload() {
 		document.body.removeClass('hydra-active');
 		this.strudel?.stop()
-		clearHydra();
 	}
 
 	async onload() {
@@ -62,9 +59,7 @@ export default class AlogRavePlugin extends Plugin {
 		});
 
 
-		this.registerEditorExtension([
-			flashField,
-		]);
+		this.registerEditorExtension(this.strudel.extensions())
 
 
 		this.addCommand({
@@ -86,9 +81,7 @@ export default class AlogRavePlugin extends Plugin {
 				key: 'x',
 			}],
 			callback: () => {
-				this.strudel.evaluate('hush()');
 				this.strudel.stop();
-				clearHydra();
 				document.body.removeClass('hydra-active');
 			},
 		})
@@ -101,10 +94,10 @@ export default class AlogRavePlugin extends Plugin {
 			}],
 			callback: () => {
 				if (document.body.hasClass('hydra-active')) {
-					clearHydra();
+					this.strudel.stopHydra()
 					document.body.removeClass('hydra-active');
 				} else {
-					initHydra();
+					this.strudel.startHydra();
 				}
 				document.body.addClass('hydra-active');
 			},
@@ -148,7 +141,7 @@ export default class AlogRavePlugin extends Plugin {
 				console.log(content)
 				// @ts-expect-error, not typed
 				const editorView = view.editor.cm as EditorView
-				flash(editorView)
+				this.strudel.flashCode(editorView)
 				this.strudel.evaluate(content);
 			},
 		})

@@ -1,6 +1,9 @@
-import { initStrudel, getRepl } from "./strudelWeb"
-import { aliasBank, registerSynthSounds, registerZZFXSounds, samples } from '@strudel/webaudio';
+import { initStrudel, hush } from './strudelWeb';
+import { aliasBank, registerSynthSounds, registerZZFXSounds, samples } from "@strudel/webaudio"
 import { registerSoundfonts } from '@strudel/soundfonts';
+import { flash, flashField } from "@strudel/codemirror";
+
+import { initHydra, clearHydra } from "@strudel/hydra";
 
 
 export class StrudelClient {
@@ -22,8 +25,30 @@ export class StrudelClient {
 	}
 
 	async stop() {
-		console.log('Stopping repl...');
-		getRepl().stop();
+		console.log('Stopping ...');
+		this.evaluate('hush()');
+		hush();
+		clearHydra();
+	}
+
+	async startHydra() {
+		console.log('Starting hydra...');
+		initHydra();
+	}
+
+	async stopHydra() {
+		console.log('Stopping hydra...');
+		clearHydra();
+	}
+
+	flashCode(editorView) {
+		flash(editorView);
+	}
+
+	extensions() {
+		return [
+			flashField,
+		];
 	}
 }
 
