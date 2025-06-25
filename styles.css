@@ -6,3 +6,54 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+/* .titlebar { */
+/* 	background-color: transparent; */
+/* } */
+.cm-contentContainer .HyperMD-codeblock{
+	background-color: transparent !important;
+	/* opacity: 0.5 !important; */
+	/* z-index: 0 !important; */
+}
+
+#hydra-canvas {
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+	width: 100vw !important;
+	height: 100vh !important;
+	z-index: -1 !important;
+	pointer-events: none !important;
+}
+
+/* Make ALL UI containers transparent */
+body, 
+.app-container,
+.horizontal-main-container,
+.workspace,
+.workspace-split,
+.workspace-tabs,
+.workspace-tab-container,
+.workspace-leaf,
+.workspace-leaf-content,
+.view-content,
+.markdown-source-view,
+.markdown-preview-view,
+.cm-editor,
+.cm-scroller,
+.cm-content,
+.cm-contentContainer,
+.markdown-rendered,
+.markdown-preview-sizer {
+	background: transparent !important;
+	background-color: transparent !important;
+}
+
+/* Keep text readable but transparent backgrounds */
+.workspace-tab-header,
+.view-header,
+.nav-files-container,
+.status-bar {
+	background: rgba(0, 0, 0, 0.1) !important;
+	backdrop-filter: blur(2px) !important;
+}

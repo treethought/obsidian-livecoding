@@ -1,8 +1,9 @@
-import { App, Editor, MarkdownView, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Notice, Plugin, PluginSettingTab, Setting, WorkspaceLeaf } from 'obsidian';
 import { StrudelClient } from './strudel';
 import { EditorView } from '@codemirror/view';
-import { flash, flashField } from "@strudel/codemirror";
 
+import { flash, flashField } from "@strudel/codemirror";
+import { initHydra } from "@strudel/hydra";
 
 interface MyPluginSettings {
 	mySetting: string;
@@ -22,24 +23,14 @@ export default class AlogRavePlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
-		if (!this.strudel) {
-			this.strudel = new StrudelClient();
-			await this.strudel.init()
-		}
+
+		this.strudel = new StrudelClient();
+
+		await this.strudel.init();
 
 
-		this.registerEditorExtension(flashField);
-		this.addRibbonIcon('music', 'ALGORAVE', () => {
-			// this.activateView(VIEW_TYPE_REPO);
-		});
+		this.registerEditorExtension([flashField]);
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
-		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
 
 		this.addCommand({
 			id: 'RAVE-hush',
@@ -50,6 +41,17 @@ export default class AlogRavePlugin extends Plugin {
 			}],
 			callback: () => {
 				this.strudel.evaluate('hush()')
+			},
+		})
+		this.addCommand({
+			id: 'hydra',
+			name: 'HYDRA',
+			hotkeys: [{
+				modifiers: ['Shift', "Alt"],
+				key: 'h',
+			}],
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				initHydra({ feedStrudel: true })
 			},
 		})
 
