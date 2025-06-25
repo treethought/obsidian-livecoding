@@ -24,9 +24,7 @@ export default class AlogRavePlugin extends Plugin {
 	}
 
 	async onload() {
-
 		await this.loadSettings();
-
 
 		// Check for hydra canvas periodically
 		this.registerInterval(window.setInterval(() => {
@@ -40,10 +38,15 @@ export default class AlogRavePlugin extends Plugin {
 
 		this.strudel = new StrudelClient();
 
-		await this.strudel.init();
+		await this.strudel.init({
+			onEvalError: (err: string) => this.onEvalError(err),
+			beforeStart: () => { new Notice("Starting Strudel..."); },
+		});
 
 
-		this.registerEditorExtension([flashField]);
+		this.registerEditorExtension([
+			flashField,
+		]);
 
 
 		this.addCommand({
@@ -133,6 +136,10 @@ export default class AlogRavePlugin extends Plugin {
 		})
 
 	}
+	onEvalError(err: string) {
+		new Notice(err);
+	}
+
 
 	getCodeBlockContent(editor: Editor): string | null {
 		const cursor = editor.getCursor();

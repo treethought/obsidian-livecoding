@@ -1,15 +1,20 @@
 import { initStrudel, getRepl } from "./strudelWeb"
+import { aliasBank, registerSynthSounds, registerZZFXSounds, samples } from '@strudel/webaudio';
+import { registerSoundfonts } from '@strudel/soundfonts';
+
 
 export class StrudelClient {
 	constructor() {
 		this.strudel = null;
 	}
 
-	async init() {
-		console.log('Initializing Strudel Client...');
-		await initStrudel({
+	async init(options = {}) {
+		options = {
 			prebake: prebake,
-		});
+			...options,
+		}
+		console.log('Initializing Strudel...');
+		await initStrudel(options);
 	}
 
 	async evaluate(code) {
@@ -28,6 +33,7 @@ async function prebake() {
 	const ds = 'https://raw.githubusercontent.com/felixroos/dough-samples/main/';
 	const ts = 'https://raw.githubusercontent.com/todepond/samples/main/';
 	await Promise.all([
+		registerSoundfonts(),
 		registerSynthSounds(),
 		registerZZFXSounds(),
 		// samples('http://localhost:5432'),
