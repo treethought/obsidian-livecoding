@@ -7,15 +7,6 @@ If your plugin does not need CSS, delete this file.
 
 */
 
-/* .titlebar { */
-/* 	background-color: transparent; */
-/* } */
-.cm-contentContainer .HyperMD-codeblock{
-	background-color: transparent !important;
-	/* opacity: 0.5 !important; */
-	/* z-index: 0 !important; */
-}
-
 #hydra-canvas {
 	position: fixed !important;
 	top: 0 !important;
@@ -48,7 +39,8 @@ body.hydra-active .markdown-preview-sizer {
 	background-color: transparent !important;
 }
 
-/* Keep text readable but transparent backgrounds when hydra is active */
+
+/* Keep nav text readable but transparent */
 body.hydra-active .workspace-tab-header,
 body.hydra-active .view-header,
 body.hydra-active .nav-files-container,
@@ -56,3 +48,26 @@ body.hydra-active .status-bar {
 	background: rgba(0, 0, 0, 0.1) !important;
 	backdrop-filter: blur(2px) !important;
 }
+
+body.hydra-active .nav-action-button,
+body.hydra-active .search-input,
+body.hydra-active .nav-file-title-text,
+body.hydra-active .nav-file-tag,
+body.hydra-active .nav-empty-message {
+	background: rgba(0, 0, 0, 0.2) !important;
+	color: white !important;
+}
+
+/* code lines readable over hydra */  
+body.hydra-active .cm-line {
+	max-width: fit-content !important;
+    background: hsla(50,23%,5%,0.6) !important;
+    padding: 0px !important;
+}
+
+body.hydra-active .notice {
+	background: rgba(0, 0, 0, 0.9) !important;
+	color: red !important;
+	border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
