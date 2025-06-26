@@ -1,14 +1,12 @@
 // modified @strudel/web component to export the repl directly
 export * from '@strudel/core';
 export * from '@strudel/webaudio';
-//export * from '@strudel/soundfonts';
 export * from '@strudel/transpiler';
 export * from '@strudel/mini';
 export * from '@strudel/tonal';
 export * from '@strudel/webaudio';
 import { Pattern, evalScope, setTime } from '@strudel/core';
 import { initAudioOnFirstClick, registerSynthSounds, webaudioRepl } from '@strudel/webaudio';
-// import { registerSoundfonts } from '@strudel/soundfonts';
 import { evaluate as _evaluate, transpiler } from '@strudel/transpiler';
 import { miniAllStrings } from '@strudel/mini';
 
@@ -20,6 +18,7 @@ export async function defaultPrebake() {
 		import('@strudel/mini'),
 		import('@strudel/tonal'),
 		import('@strudel/webaudio'),
+		import('@strudel/hydra'),
 		{ hush, evaluate },
 	);
 	await Promise.all([loadModules, registerSynthSounds() /* , registerSoundfonts() */]);
@@ -30,7 +29,6 @@ let initDone;
 
 let repl;
 export function initStrudel(options = {}) {
-	console.log("WEB INIT STRUDEL")
 	initAudioOnFirstClick();
 	options.miniAllStrings !== false && miniAllStrings();
 	const { prebake, ...replOptions } = options;

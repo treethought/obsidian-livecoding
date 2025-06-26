@@ -1,45 +1,66 @@
-import { App, Editor, MarkdownView, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { Editor, MarkdownView, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
 import { StrudelClient } from './strudel';
 import { EditorView } from '@codemirror/view';
-import { flash, flashField } from "@strudel/codemirror";
 
+import { AlgoRaveSamplesView, VIEW_TYPE_ALGORAVE_SAMPLES } from 'view';
 
-interface MyPluginSettings {
+interface AlgoRavePluginSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: MyPluginSettings = {
+const DEFAULT_SETTINGS: AlgoRavePluginSettings = {
 	mySetting: 'default'
 }
 
 export default class AlogRavePlugin extends Plugin {
-	settings: MyPluginSettings;
+	settings: AlgoRavePluginSettings;
 	strudel: StrudelClient;
 
 	onunload() {
+		document.body.removeClass('hydra-active');
 		this.strudel?.stop()
 	}
 
 	async onload() {
 		await this.loadSettings();
-		if (!this.strudel) {
-			this.strudel = new StrudelClient();
-			await this.strudel.init()
-		}
 
+		this.registerView(
+			VIEW_TYPE_ALGORAVE_SAMPLES,
+			(leaf) => new AlgoRaveSamplesView(leaf),
+		);
 
-		this.registerEditorExtension(flashField);
-		this.addRibbonIcon('music', 'ALGORAVE', () => {
-			// this.activateView(VIEW_TYPE_REPO);
-		});
+		// Check for hydra canvas periodically
+		this.registerInterval(window.setInterval(() => {
+			const hydraCanvas = document.getElementById('hydra-canvas');
+			if (hydraCanvas && !document.body.hasClass('hydra-active')) {
+				document.body.addClass('hydra-active');
+			} else if (!hydraCanvas && document.body.hasClass('hydra-active')) {
+				document.body.removeClass('hydra-active');
+			}
+		}, 1000));
 
 		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Sample Plugin', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice('This is a notice!');
+		const ribbonIcon = this.addRibbonIcon(
+			"music",
+			"AlgoRave Samples",
+			(_evt: MouseEvent) => {
+				// Called when the user clicks the icon.
+				this.activateView(VIEW_TYPE_ALGORAVE_SAMPLES);
+			},
+		);
+		ribbonIcon.addClass("my-plugin-ribbWebClipson-class");
+
+
+		this.strudel = new StrudelClient();
+
+		await this.strudel.init({
+			onEvalError: (err: string) => this.onEvalError(err),
+			beforeStart: () => { new Notice("Starting Strudel..."); },
 		});
-		// Perform additional things with the ribbon
-		ribbonIconEl.addClass('my-plugin-ribbon-class');
+
+
+		this.registerEditorExtension(this.strudel.extensions())
+
 
 		this.addCommand({
 			id: 'RAVE-hush',
@@ -49,7 +70,36 @@ export default class AlogRavePlugin extends Plugin {
 				key: 'h',
 			}],
 			callback: () => {
-				this.strudel.evaluate('hush()')
+				this.strudel.evaluate('hush()');
+			},
+		})
+		this.addCommand({
+			id: 'RAVE-stop',
+			name: 'Stop',
+			hotkeys: [{
+				modifiers: ['Shift', "Ctrl"],
+				key: 'x',
+			}],
+			callback: () => {
+				this.strudel.stop();
+				document.body.removeClass('hydra-active');
+			},
+		})
+		this.addCommand({
+			id: 'rave-toggle-hydra',
+			name: 'toggle Hydra style',
+			hotkeys: [{
+				modifiers: ['Shift', "Alt"],
+				key: 'h',
+			}],
+			callback: () => {
+				if (document.body.hasClass('hydra-active')) {
+					this.strudel.stopHydra()
+					document.body.removeClass('hydra-active');
+				} else {
+					this.strudel.startHydra();
+				}
+				document.body.addClass('hydra-active');
 			},
 		})
 
@@ -60,7 +110,7 @@ export default class AlogRavePlugin extends Plugin {
 				modifiers: ['Shift', "Ctrl"],
 				key: 'p',
 			}],
-			editorCallback: (editor: Editor, view: MarkdownView) => {
+			editorCallback: (editor: Editor, _view: MarkdownView) => {
 				const sel = editor.getValue()
 				this.strudel.evaluate(sel)
 			},
@@ -88,25 +138,19 @@ export default class AlogRavePlugin extends Plugin {
 					new Notice("No code block found at cursor position.");
 					return;
 				}
+				console.log(content)
 				// @ts-expect-error, not typed
 				const editorView = view.editor.cm as EditorView
-				flash(editorView)
+				this.strudel.flashCode(editorView)
 				this.strudel.evaluate(content);
 			},
 		})
 
-
-		this.registerMarkdownPostProcessor((element, context) => {
-			// TODO eval from processor if mode enabled
-			return
-			const codeblocks = element.findAll('code');
-
-			for (let codeblock of codeblocks) {
-				const text = codeblock.innerText.trim();
-				this.strudel.evaluate(text)
-			}
-		});
 	}
+	onEvalError(err: string) {
+		new Notice(err);
+	}
+
 
 	getCodeBlockContent(editor: Editor): string | null {
 		const cursor = editor.getCursor();
@@ -150,4 +194,29 @@ export default class AlogRavePlugin extends Plugin {
 	async saveSettings() {
 		await this.saveData(this.settings);
 	}
+	async activateView(v: string) {
+		const { workspace } = this.app;
+
+		let leaf: WorkspaceLeaf | null = null;
+		const leaves = workspace.getLeavesOfType(v);
+
+		if (leaves.length > 0) {
+			console.log("Found existing leaves:", leaves);
+			// A leaf with our view already exists, use that
+			leaf = leaves[0];
+			workspace.revealLeaf(leaf);
+			return;
+		}
+
+		// Our view could not be found in the workspace, create a new leaf
+		// in the right sidebar for it
+		leaf = workspace.getRightLeaf(false);
+		await leaf?.setViewState({ type: v, active: true });
+
+		// "Reveal" the leaf in case it is in a collapsed sidebar
+		if (leaf) {
+			workspace.revealLeaf(leaf);
+		}
+	}
 }
+

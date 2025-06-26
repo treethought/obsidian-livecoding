@@ -6,3 +6,68 @@ available in the app when your plugin is enabled.
 If your plugin does not need CSS, delete this file.
 
 */
+
+#hydra-canvas {
+	position: fixed !important;
+	top: 0 !important;
+	left: 0 !important;
+	width: 100vw !important;
+	height: 100vh !important;
+	z-index: -1 !important;
+	pointer-events: none !important;
+}
+
+/* Only apply transparent backgrounds when hydra is active */
+body.hydra-active .app-container,
+body.hydra-active .horizontal-main-container,
+body.hydra-active .workspace,
+body.hydra-active .workspace-split,
+body.hydra-active .workspace-tabs,
+body.hydra-active .workspace-tab-container,
+body.hydra-active .workspace-leaf,
+body.hydra-active .workspace-leaf-content,
+body.hydra-active .view-content,
+body.hydra-active .markdown-source-view,
+body.hydra-active .markdown-preview-view,
+body.hydra-active .cm-editor,
+body.hydra-active .cm-scroller,
+body.hydra-active .cm-content,
+body.hydra-active .cm-contentContainer,
+body.hydra-active .markdown-rendered,
+body.hydra-active .markdown-preview-sizer {
+	background: transparent !important;
+	background-color: transparent !important;
+}
+
+
+/* Keep nav text readable but transparent */
+body.hydra-active .workspace-tab-header,
+body.hydra-active .view-header,
+body.hydra-active .nav-files-container,
+body.hydra-active .status-bar {
+	background: rgba(0, 0, 0, 0.1) !important;
+	backdrop-filter: blur(2px) !important;
+}
+
+body.hydra-active .nav-action-button,
+body.hydra-active .search-input,
+body.hydra-active .nav-file-title-text,
+body.hydra-active .nav-file-tag,
+body.hydra-active .nav-empty-message {
+	background: rgba(0, 0, 0, 0.2) !important;
+	color: white !important;
+}
+
+/* code lines readable over hydra */  
+body.hydra-active .cm-line {
+	max-width: fit-content !important;
+    background: hsla(50,23%,5%,0.6) !important;
+    padding: 0px !important;
+}
+
+body.hydra-active .notice {
+	background: rgba(0, 0, 0, 0.9) !important;
+	color: red !important;
+	border: 1px solid rgba(255, 255, 255, 0.2) !important;
+}
+
