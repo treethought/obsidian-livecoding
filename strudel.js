@@ -68,7 +68,6 @@ async function prebake() {
 		registerSoundfonts(),
 		registerSynthSounds(),
 		registerZZFXSounds(),
-		samples('http://localhost:5432'),
 		samples('github:tidalcycles/dirt-samples'),
 		samples(`${ds}/tidal-drum-machines.json`),
 		samples(`${ds}/piano.json`),
