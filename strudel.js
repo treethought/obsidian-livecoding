@@ -5,6 +5,7 @@ import { flash, flashField } from "@strudel/codemirror";
 
 import { initHydra, clearHydra } from "@strudel/hydra";
 
+let initDone = null;
 
 export class StrudelClient {
 	constructor() {
@@ -12,6 +13,11 @@ export class StrudelClient {
 	}
 
 	async init(options = {}) {
+		if (initDone) {
+			console.warn('Strudel already initialized, skipping init.');
+			return;
+		}
+		initDone = true
 		options = {
 			prebake: prebake,
 			...options,
@@ -23,6 +29,7 @@ export class StrudelClient {
 	async evaluate(code) {
 		return evaluate(code);
 	}
+
 
 	async stop() {
 		console.log('Stopping ...');
@@ -61,7 +68,7 @@ async function prebake() {
 		registerSoundfonts(),
 		registerSynthSounds(),
 		registerZZFXSounds(),
-		// samples('http://localhost:5432'),
+		samples('http://localhost:5432'),
 		samples('github:tidalcycles/dirt-samples'),
 		samples(`${ds}/tidal-drum-machines.json`),
 		samples(`${ds}/piano.json`),

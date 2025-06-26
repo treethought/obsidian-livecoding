@@ -1,94 +1,66 @@
-# Obsidian Sample Plugin
+# Obsidian Livecoding
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+[Obsidian](https://obsidian.md/) plugin for live coding music and visuals with [Strudel](https://strudel.cc/workshop/getting-started/) and [Hydra](https://hydra.ojack.xyz/). 
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## Usage
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+Write Strudel or Hydra code in `js` code blocks. Use `Shift+Ctrl+E` to evaluate the code block where your cursor is positioned. 
 
-## First time developing plugins?
+You can have multiple code blocks in a single note - only the block containing your cursor will be evaluated. Code is evaluated directly as written, so both Strudel and Hydra evaluated code will replace the previously evaluated code for each respectively.
 
-Quick starting guide for new plugin devs:
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+Paste this README into note as an example.
 
-## Releasing new releases
+**Strudel:**
+```js
+setCpm(20)
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+$DRUMS: stack(
+s("bd(4, 4)").struct("t(6, 8)"),
+s("[hc cpu](6, 8)").jux(rev).struct("f(5, 8)"),
+)
+.jux((x)=>x.room("0 .. 0.2"))
+.delay(0.1)
+.lpf(2900)
+.swing("1/3", 4)
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
-
-## Adding your plugin to the community plugin list
-
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
-
-## How to use
-
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
-
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint .\src\`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+$MELODY: n("0 2 4 <[6,8] [7,9]>".off(1/8, x=>x.add("4 12 <7 5> 17")))
+.scale("<C G>:minor").sound("piano")
+.off(1/4, x=>x.s("gm_steel_drums")
+	.sometimes(ply(3)).room(0.5).crush("<4 [1 2] 0>"))
+.room(0.8)
+.size(0.3)
+.swing("1/3", 4)
 ```
 
-If you have multiple URLs, you can also do:
+**Hydra:**
+Note that Hydra is loaded via Strudel, so you must call `initHydra`.
 
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+```js
+await initHydra()
+let pat = "4 2 [8 .. 16] 6 6"
+let pat2 = "<[0.2 0.7] [0.8 0.1] 0 3>".add(0.1)
+voronoi(H(pat), 0.2, H(pat2))
+//.blend(noise(H(pat), 0.2))
+//.mult(osc(H(pat), H("0.2 0.7"), H(pat2)))
+.modulate(shape(H("<5 4 3 6 5 4 3>")).rotate(0, 0.4).repeat(H(pat),H(pat2)))
+.out()
 ```
 
-## API Documentation
 
-See https://github.com/obsidianmd/obsidian-api
+## Key Bindings
+
+| Command | Key Binding | Description |
+|---------|-------------|-------------|
+| Evaluate Block | `Shift+Ctrl+E` or `Shift+Ctrl+Enter` | Evaluate code block at cursor |
+| Evaluate File | `Shift+Ctrl+P` | Evaluate entire file |
+| Hush | `Shift+Ctrl+H` | Stop all sounds |
+| Stop | `Shift+Ctrl+X` | Stop Strudel and Hydra |
+| Toggle Hydra | `Shift+Alt+H` | Start/stop Hydra visuals |
+
+## Installation
+
+1. Copy the plugin folder to `.obsidian/plugins/obsidian-algorave/` in your vault
+2. Enable the plugin in Obsidian's Community Plugins settings
+3. Use the music icon in the ribbon to open the sound browser
+

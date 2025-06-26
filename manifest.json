@@ -1,11 +1,10 @@
 {
-	"id": "obsidian-algorave",
-	"name": "Algorave",
+	"id": "obsidian-livecoding",
+	"name": "LiveCoding",
 	"version": "0.0.1",
 	"minAppVersion": "0.15.0",
-	"description": "Demonstrates some of the capabilities of the Obsidian API.",
-	"author": "Obsidian",
-	"authorUrl": "https://obsidian.md",
-	"fundingUrl": "https://obsidian.md/pricing",
+	"description": "Plugin to live code music and visuals with strudel and hydra",
+	"author": "treethought",
+	"authorUrl": "https://github.com/treethought",
 	"isDesktopOnly": false
 }
