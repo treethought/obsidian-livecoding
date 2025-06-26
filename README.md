@@ -64,7 +64,9 @@ noise(H(pat), 0.8, H(pat2))
 
 ## Installation
 
-1. Copy the plugin folder to `.obsidian/plugins/obsidian-algorave/` in your vault
-2. Enable the plugin in Obsidian's Community Plugins settings
-3. Use the music icon in the ribbon to open the sound browser
+Either install manually, or use [BRAT](https://github.com/TfTHacker/obsidian42-brat)
+
+1. Download the latest release
+2. Extract to VaultFolder/.obsidian/plugins/obsidian-livecoding/
+3. Enable the plugin in Obsidian settings
 
