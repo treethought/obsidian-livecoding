@@ -1,6 +1,9 @@
 # Obsidian Livecoding
 
-[Obsidian](https://obsidian.md/) plugin for live coding music and visuals with [Strudel](https://strudel.cc/workshop/getting-started/) and [Hydra](https://hydra.ojack.xyz/). 
+[Obsidian](https://obsidian.md/) plugin for live coding music and visuals with [Strudel](https://strudel.cc/workshop/getting-started/) and [Hydra](https://hydra.ojack.xyz/).
+
+
+![Screenshot_20250625_212632](https://github.com/user-attachments/assets/210262db-2764-4c20-a612-04be315671b6)
 
 ## Usage
 
