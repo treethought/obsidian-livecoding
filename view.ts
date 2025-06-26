@@ -139,7 +139,6 @@ export class AlgoRaveSamplesView extends ItemView {
 			.filter(([key]) => !key.startsWith('_'))
 			.filter(([name]) => name.toLowerCase().includes(this.searchTerm))
 			.filter(([_, sound]) => {
-				console.log(`Filtering sound: ${sound.data.type} - ${sound.data.tag}`);
 				switch (this.currentFilter) {
 					case 'user':
 						return !sound.data.prebake;
