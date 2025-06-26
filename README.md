@@ -15,6 +15,7 @@ You can have multiple code blocks in a single note - only the block containing y
 Paste this README into note as an example.
 
 **Strudel:**
+
 ```js
 setCpm(20)
 
@@ -43,13 +44,13 @@ Note that Hydra is loaded via Strudel, so you must call `initHydra`.
 await initHydra()
 let pat = "4 2 [8 .. 16] 6 6"
 let pat2 = "<[0.2 0.7] [0.8 0.1] 0 3>".add(0.1)
-voronoi(H(pat), 0.2, H(pat2))
-//.blend(noise(H(pat), 0.2))
-//.mult(osc(H(pat), H("0.2 0.7"), H(pat2)))
-.modulate(shape(H("<5 4 3 6 5 4 3>")).rotate(0, 0.4).repeat(H(pat),H(pat2)))
+noise(H(pat), 0.8, H(pat2))
+.modulate(osc(10000,1).modulate(osc().luma(0.8), 0.8))
+.mult(osc(H(pat2), 0.9, 0.2))
+.blend(shape(H("<5 4 3 6 5 4 3>")).rotate(0, 0.8).repeat(4,4).saturate(H(pat),H(pat2)), H("0.1 .. 0.9"))
+.blend(o0).modulate(o0)
 .out()
 ```
-
 
 ## Key Bindings
 
