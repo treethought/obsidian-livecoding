@@ -8,9 +8,6 @@ import { initHydra, clearHydra } from "@strudel/hydra";
 let initDone = null;
 
 export class StrudelClient {
-	constructor() {
-		this.strudel = null;
-	}
 
 	async init(options = {}) {
 		if (initDone) {
@@ -32,8 +29,8 @@ export class StrudelClient {
 
 
 	async stop() {
-		console.log('Stopping ...');
-		this.evaluate('hush()');
+		console.log('Stopping strudel');
+		initDone = null;
 		hush();
 		clearHydra();
 	}
