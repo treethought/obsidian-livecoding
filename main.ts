@@ -1,6 +1,7 @@
-import { Editor, MarkdownView, Notice, Plugin, WorkspaceLeaf } from 'obsidian';
+import { App, Editor, MarkdownView, Modal, Notice, Plugin, Setting, WorkspaceLeaf } from 'obsidian';
 import { StrudelClient } from './strudel';
 import { EditorView } from '@codemirror/view';
+import { clipperTemplate } from 'clipperTemplate';
 
 import { AlgoRaveSamplesView, VIEW_TYPE_ALGORAVE_SAMPLES } from 'view';
 
@@ -14,11 +15,11 @@ const DEFAULT_SETTINGS: AlgoRavePluginSettings = {
 
 export default class AlogRavePlugin extends Plugin {
 	settings: AlgoRavePluginSettings;
-	strudel: StrudelClient;
+	strudel: StrudelClient | null = null;
+	extensionsRegistered: boolean = false;
 
 	onunload() {
-		document.body.removeClass('hydra-active');
-		this.strudel?.stop()
+		this.stop()
 	}
 
 	async onload() {
@@ -28,16 +29,6 @@ export default class AlogRavePlugin extends Plugin {
 			VIEW_TYPE_ALGORAVE_SAMPLES,
 			(leaf) => new AlgoRaveSamplesView(leaf),
 		);
-
-		// Check for hydra canvas periodically
-		this.registerInterval(window.setInterval(() => {
-			const hydraCanvas = document.getElementById('hydra-canvas');
-			if (hydraCanvas && !document.body.hasClass('hydra-active')) {
-				document.body.addClass('hydra-active');
-			} else if (!hydraCanvas && document.body.hasClass('hydra-active')) {
-				document.body.removeClass('hydra-active');
-			}
-		}, 1000));
 
 		// This creates an icon in the left ribbon.
 		const ribbonIcon = this.addRibbonIcon(
@@ -50,27 +41,25 @@ export default class AlogRavePlugin extends Plugin {
 		);
 		ribbonIcon.addClass("my-plugin-ribbWebClipson-class");
 
-
-		this.strudel = new StrudelClient();
-
-		await this.strudel.init({
-			onEvalError: (err: string) => this.onEvalError(err),
-			beforeStart: () => { new Notice("Starting Strudel..."); },
-		});
-
-
-		this.registerEditorExtension(this.strudel.extensions())
+		// Check for hydra canvas periodically
+		this.registerInterval(window.setInterval(() => {
+			const hydraCanvas = document.getElementById('hydra-canvas');
+			if (hydraCanvas && !document.body.hasClass('hydra-active')) {
+				document.body.addClass('hydra-active');
+			} else if (!hydraCanvas && document.body.hasClass('hydra-active')) {
+				document.body.removeClass('hydra-active');
+			}
+		}, 1000));
 
 
 		this.addCommand({
-			id: 'RAVE-hush',
-			name: 'HUSH',
-			hotkeys: [{
-				modifiers: ['Shift', "Ctrl"],
-				key: 'h',
-			}],
-			callback: () => {
-				this.strudel.evaluate('hush()');
+			id: 'RAVE-start',
+			name: 'Enable RAVE',
+			checkCallback: (checking: boolean) => {
+				if (checking) {
+					return !this.strudel;
+				}
+				this.start();
 			},
 		})
 		this.addCommand({
@@ -80,9 +69,11 @@ export default class AlogRavePlugin extends Plugin {
 				modifiers: ['Shift', "Ctrl"],
 				key: 'x',
 			}],
-			callback: () => {
-				this.strudel.stop();
-				document.body.removeClass('hydra-active');
+			checkCallback: (checking: boolean) => {
+				if (checking) {
+					return this.strudel !== null;
+				}
+				this.stop()
 			},
 		})
 		this.addCommand({
@@ -92,27 +83,32 @@ export default class AlogRavePlugin extends Plugin {
 				modifiers: ['Shift', "Alt"],
 				key: 'h',
 			}],
-			callback: () => {
+			checkCallback: (checking: boolean) => {
+				if (checking) {
+					return this.strudel !== null;
+				}
 				if (document.body.hasClass('hydra-active')) {
-					this.strudel.stopHydra()
+					this.strudel?.stopHydra()
 					document.body.removeClass('hydra-active');
 				} else {
-					this.strudel.startHydra();
+					this.strudel?.startHydra();
 				}
 				document.body.addClass('hydra-active');
 			},
 		})
 
 		this.addCommand({
-			id: 'RAVE-evaluate-file',
-			name: 'Evaluate File',
+			id: 'RAVE-hush',
+			name: 'HUSH',
 			hotkeys: [{
 				modifiers: ['Shift', "Ctrl"],
-				key: 'p',
+				key: 'h',
 			}],
-			editorCallback: (editor: Editor, _view: MarkdownView) => {
-				const sel = editor.getValue()
-				this.strudel.evaluate(sel)
+			checkCallback: (checking: boolean) => {
+				if (checking) {
+					return this.strudel !== null;
+				}
+				this.strudel?.evaluate('hush()');
 			},
 		})
 
@@ -127,28 +123,77 @@ export default class AlogRavePlugin extends Plugin {
 				modifiers: ["Shift", "Ctrl"],
 				key: "enter",
 			}],
-			editorCallback: (editor: Editor, view: MarkdownView) => {
-				if (!editor) {
-					new Notice("No editor found.");
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (checking) {
+					return (this.strudel !== null) && (editor !== null);
+				}
+				if (!this.strudel) {
+					new Notice("RAVE is not running.");
+					console.log("RAVE is not running., prompting to enable");
+					new EnableModal(this.app, async (result: boolean) => {
+						if (result) {
+							await this.start();
+							this.evalBlock(editor, view)
+						}
+					}).open()
 					return;
 				}
+				this.evalBlock(editor, view)
 
-				const content = this.getCodeBlockContent(editor);
-				if (!content) {
-					new Notice("No code block found at cursor position.");
-					return;
-				}
-				console.log(content)
-				// @ts-expect-error, not typed
-				const editorView = view.editor.cm as EditorView
-				this.strudel.flashCode(editorView)
-				this.strudel.evaluate(content);
+			},
+		})
+		this.addCommand({
+			id: 'RAVE-show-template',
+			name: 'Strudel Web Clipper Template',
+			callback: () => {
+				new ClipperTemplateModal(this.app).open()
+
 			},
 		})
 
 	}
+
+	evalBlock(editor: Editor, view: MarkdownView) {
+		const content = this.getCodeBlockContent(editor);
+		if (!content) {
+			new Notice("No code block found at cursor position.");
+			return;
+		}
+		console.log(content)
+		// @ts-expect-error, not typed
+		const editorView = view.editor.cm as EditorView
+		this.strudel?.flashCode(editorView)
+		this.strudel?.evaluate(content);
+
+	}
 	onEvalError(err: string) {
 		new Notice(err);
+	}
+
+	async start() {
+		if (this.strudel) {
+			this.stop()
+		}
+
+		console.log("Starting RAVE");
+		this.strudel = new StrudelClient();
+		await this.strudel.init({
+			onEvalError: (err: string) => this.onEvalError(err),
+			beforeStart: () => { new Notice("Starting Strudel..."); },
+		});
+
+		if (!this.extensionsRegistered) {
+			this.extensionsRegistered = true;
+			this.registerEditorExtension(this.strudel.extensions())
+		}
+	}
+
+	stop() {
+		console.log("Stopping RAVE");
+		const strudel = this.strudel;
+		this.strudel = null;
+		document.body.removeClass('hydra-active');
+		strudel?.stop()
 	}
 
 
@@ -220,3 +265,53 @@ export default class AlogRavePlugin extends Plugin {
 	}
 }
 
+export class ClipperTemplateModal extends Modal {
+
+	constructor(app: App) {
+		super(app);
+		this.setTitle('Web Clipper Template');
+		this.setContent("Sample template for clipping from strudel REPL")
+
+		new Setting(this.contentEl)
+			.setDesc(JSON.stringify(clipperTemplate, null, 2))
+			.setHeading()
+			.addButton((btn) =>
+				btn
+					.setButtonText('Copy')
+					.setCta()
+					.onClick(async () => {
+						this.close();
+						await navigator.clipboard.writeText(JSON.stringify(clipperTemplate, null, 2));
+						new Notice("Copied to clipboard");
+					}));
+	}
+}
+
+
+export class EnableModal extends Modal {
+	constructor(app: App, onSubmit: (result: boolean) => void) {
+		super(app);
+		this.setTitle('Enable RAVE?');
+		this.setContent("Enabling RAVE mode will allow obisidan-livecodiing plugin to evaluate JS code in strudel and hydra")
+
+		const mod = new Setting(this.contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText('Yes')
+					.setCta()
+					.onClick(() => {
+						this.close();
+						onSubmit(true);
+					}));
+
+		mod.addButton((btn) =>
+			btn
+				.setButtonText('No')
+				.setCta()
+				.onClick(() => {
+					this.close();
+					onSubmit(false);
+				}));
+
+	}
+}
