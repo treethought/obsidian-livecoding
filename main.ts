@@ -1,6 +1,7 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, Setting, WorkspaceLeaf } from 'obsidian';
 import { StrudelClient } from './strudel';
 import { EditorView } from '@codemirror/view';
+import { clipperTemplate } from 'clipperTemplate';
 
 import { AlgoRaveSamplesView, VIEW_TYPE_ALGORAVE_SAMPLES } from 'view';
 
@@ -141,6 +142,14 @@ export default class AlogRavePlugin extends Plugin {
 
 			},
 		})
+		this.addCommand({
+			id: 'RAVE-show-template',
+			name: 'Strudel Web Clipper Template',
+			callback: () => {
+				new ClipperTemplateModal(this.app).open()
+
+			},
+		})
 
 	}
 
@@ -255,6 +264,29 @@ export default class AlogRavePlugin extends Plugin {
 		}
 	}
 }
+
+export class ClipperTemplateModal extends Modal {
+
+	constructor(app: App) {
+		super(app);
+		this.setTitle('Web Clipper Template');
+		this.setContent("Sample template for clipping from strudel REPL")
+
+		new Setting(this.contentEl)
+			.setDesc(JSON.stringify(clipperTemplate, null, 2))
+			.setHeading()
+			.addButton((btn) =>
+				btn
+					.setButtonText('Copy')
+					.setCta()
+					.onClick(async () => {
+						this.close();
+						await navigator.clipboard.writeText(JSON.stringify(clipperTemplate, null, 2));
+						new Notice("Copied to clipboard");
+					}));
+	}
+}
+
 
 export class EnableModal extends Modal {
 	constructor(app: App, onSubmit: (result: boolean) => void) {
