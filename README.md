@@ -21,7 +21,7 @@ setCpm(20)
 
 $DRUMS: stack(
 s("bd(4, 4)").struct("t(6, 8)"),
-s("[hc cpu](6, 8)").jux(rev).struct("f(5, 8)"),
+s("[hc house](6, 8)").jux(rev).struct("f(5, 8)"),
 )
 .jux((x)=>x.room("0 .. 0.2"))
 .delay(0.1)
@@ -31,7 +31,7 @@ s("[hc cpu](6, 8)").jux(rev).struct("f(5, 8)"),
 $MELODY: n("0 2 4 <[6,8] [7,9]>".off(1/8, x=>x.add("4 12 <7 5> 17")))
 .scale("<C G>:minor").sound("piano")
 .off(1/4, x=>x.s("gm_steel_drums")
-	.sometimes(ply(3)).room(0.5).crush("<4 [1 2] 0>"))
+	.sometimes(ply(3)).room(0.5))
 .room(0.8)
 .size(0.3)
 .swing("1/3", 4)
