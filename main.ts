@@ -150,22 +150,93 @@ export default class AlogRavePlugin extends Plugin {
 
 			},
 		})
-
+		this.addCommand({
+			id: 'RAVE-open-block-in-strudel',
+			name: 'Open Block in Strudel',
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (checking) {
+					return (this.strudel !== null) && (editor !== null);
+				}
+				this.openBlockInStrudel(editor, view)
+			}
+		})
+		this.addCommand({
+			id: 'RAVE-save-block-version',
+			name: 'Save Revision',
+			editorCheckCallback: (checking: boolean, editor: Editor, view: MarkdownView) => {
+				if (checking) {
+					return (editor !== null);
+				}
+				this.saveRevision(editor, view)
+				// TODO: input for revision name for non-propert revision
+				// new InputModal(this.app,
+				// 	"Revision Title", "Optional title for this revision", (result: string) => {
+				// 		this.saveRevision(editor, view)
+				// 	}).open()
+			}
+		})
 	}
 
 	evalBlock(editor: Editor, view: MarkdownView) {
-		const content = this.getCodeBlockContent(editor);
-		if (!content) {
+		const block = this.getCodeBlock(editor);
+		if (!block) {
 			new Notice("No code block found at cursor position.");
 			return;
 		}
-		console.log(content)
+		console.log(block.content)
 		// @ts-expect-error, not typed
 		const editorView = view.editor.cm as EditorView
 		this.strudel?.flashCode(editorView)
-		this.strudel?.evaluate(content);
+		this.strudel?.evaluate(block.content);
 
 	}
+
+	saveRevision(editor: Editor, view: MarkdownView) {
+		let u = this.getBlockUrl(editor, view);
+		if (!u) {
+			return;
+		}
+
+		const file = this.app.workspace.getActiveFile()
+		if (!file) {
+			new Notice("No active file to save to.");
+			return;
+		}
+		this.app.fileManager.processFrontMatter(file, (fm) => {
+			// add to revisions list
+			if (!fm["revisions"]) {
+				fm["revisions"] = [];
+			}
+			// avoid duplicates
+			if (fm["revisions"].includes(u)) {
+				new Notice("Revision already saved.");
+				return;
+			}
+
+			fm.revisions.push(u);
+		})
+	}
+
+	openBlockInStrudel(editor: Editor, view: MarkdownView) {
+		const u = this.getBlockUrl(editor, view);
+		if (!u) {
+			return;
+		}
+		window.open(u, '_blank')?.focus();
+	}
+
+	getBlockUrl(editor: Editor, view: MarkdownView): string | null {
+		const block = this.getCodeBlock(editor);
+		if (!block) {
+			new Notice("No code block found at cursor position.");
+			return null;
+		}
+		// @ts-expect-error, not typed
+		const editorView = view.editor.cm as EditorView
+		this.strudel?.flashCode(editorView)
+		return `https://strudel.cc/#${encodeURIComponent(btoa(block.content))}`;
+	}
+
 	onEvalError(err: string) {
 		new Notice(err);
 	}
@@ -197,7 +268,7 @@ export default class AlogRavePlugin extends Plugin {
 	}
 
 
-	getCodeBlockContent(editor: Editor): string | null {
+	getCodeBlock(editor: Editor): CodeBlock | null {
 		const cursor = editor.getCursor();
 
 		const doc = editor.getDoc();
@@ -227,7 +298,11 @@ export default class AlogRavePlugin extends Plugin {
 				{ line: endLine, ch: 0 }
 			).trim();
 
-			return codeBlockText;
+			return {
+				content: codeBlockText,
+				startLine,
+				endLine
+			};
 		}
 		return null;
 	}
@@ -265,6 +340,15 @@ export default class AlogRavePlugin extends Plugin {
 	}
 }
 
+type CodeBlock = {
+	content: string;
+	startLine: number;
+	endLine: number;
+}
+
+
+
+
 export class ClipperTemplateModal extends Modal {
 
 	constructor(app: App) {
@@ -286,6 +370,35 @@ export class ClipperTemplateModal extends Modal {
 					}));
 	}
 }
+
+export class InputModal extends Modal {
+	constructor(app: App, title: string, desc: string, onSubmit: (result: string) => void) {
+		super(app);
+		this.setTitle(title);
+		this.setContent("")
+
+		let val = "";
+		new Setting(this.contentEl)
+			.setName(title)
+			.setDesc(desc)
+			.addText((text) =>
+				text
+					.onChange((value) => {
+						val = value;
+					}));
+		new Setting(this.contentEl)
+			.addButton((btn) =>
+				btn
+					.setButtonText('Submit')
+					.setCta()
+					.onClick(() => {
+						this.close();
+						onSubmit(val);
+					}));
+
+	}
+}
+
 
 
 export class EnableModal extends Modal {

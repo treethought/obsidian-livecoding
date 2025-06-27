@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-livecoding",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Plugin to live code music and visuals with strudel and hydra",
 	"main": "main.js",
 	"scripts": {
