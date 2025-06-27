@@ -52,15 +52,18 @@ noise(H(pat), 0.8, H(pat2))
 .out()
 ```
 
-## Key Bindings
+## Commands
 
 | Command | Key Binding | Description |
 |---------|-------------|-------------|
-| Evaluate Block | `Shift+Ctrl+E` or `Shift+Ctrl+Enter` | Evaluate code block at cursor |
-| Evaluate File | `Shift+Ctrl+P` | Evaluate entire file |
-| Hush | `Shift+Ctrl+H` | Stop all sounds |
-| Stop | `Shift+Ctrl+X` | Stop Strudel and Hydra |
-| Toggle Hydra | `Shift+Alt+H` | Start/stop Hydra visuals |
+| **Enable RAVE** | - | Enables live coding mode to evaluate js code |
+| **Evaluate Block** | `Shift+Ctrl+E` or `Shift+Ctrl+Enter` | Evaluate code block at cursor |
+| **HUSH** | `Shift+Ctrl+H` | Stop all sounds |
+| **Stop** | `Shift+Ctrl+X` | Stop Strudel and Hydra and disable RAVE mode|
+| **Toggle Hydra Style** | `Shift+Alt+H` | Start/stop Hydra visuals |
+| **Open Block in Strudel** | - | Open current code block in Strudel web interface |
+| **Save Revision** | - | Save current code block strudel URL as revision in frontmatter |
+| **Strudel Web Clipper Template** | - | Show Obsidian Web Clipper template for clipping code from Strudel REPL |
 
 ## Installation
 
